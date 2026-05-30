@@ -1,11 +1,10 @@
 # ClaimsCopilot
 
-[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
+[![CI](https://github.com/zhihantan/claimscopilot/actions/workflows/ci.yml/badge.svg)](https://github.com/zhihantan/claimscopilot/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
 [![Platform: Databricks Apps](https://img.shields.io/badge/platform-Databricks_Apps-FF3621.svg)](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html)
 
-<!-- After pushing to GitHub, replace OWNER/REPO in the CI badge above. -->
 
 Assistive copilot for insurance claims adjusters at **the Company** (a fictional
 insurer), built on the Databricks Mosaic AI Agent Framework, Foundation Model
