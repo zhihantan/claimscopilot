@@ -1,0 +1,43 @@
+# Pin everything; this is what runs in production.
+
+# Web
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+sse-starlette==2.2.1
+python-multipart==0.0.19
+httpx==0.28.1
+
+# Models / agents
+langgraph==0.2.61
+langchain-core==0.3.28
+langchain-databricks==0.1.1
+langchain-community==0.3.13
+databricks-agents==0.13.0
+mlflow==2.20.1
+
+# Databricks platform
+# NOTE: the Lakebase durable checkpointer (CC_CHECKPOINTER=lakebase) needs the
+# `w.postgres` Lakebase API, which this SDK version predates. Bump databricks-sdk
+# to a version that exposes it (and re-validate the app) before enabling lakebase
+# mode — the default "memory" mode does not touch it.
+databricks-sdk==0.40.0
+databricks-vectorsearch==0.40
+
+# Durable agent checkpointer — UNCOMMENT when enabling CC_CHECKPOINTER=lakebase.
+# Left out of the default build (memory mode lazy-imports them, so they're unused
+# at runtime) to avoid adding install risk to deploys that don't need them.
+# Re-pin to exact versions after a successful lakebase deploy.
+# langgraph-checkpoint-postgres>=2.0,<3
+# psycopg[binary]>=3.1,<4
+# psycopg-pool>=3.2,<4
+
+# Schemas / validation
+pydantic==2.10.4
+pydantic-settings==2.7.1
+
+# Utilities
+python-dateutil==2.9.0.post0
+backoff==2.2.1
+tenacity==9.0.0
+orjson==3.10.13
+structlog==24.4.0

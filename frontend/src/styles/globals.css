@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --font-features: "cv11", "ss03", "ss04";
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  font-feature-settings: var(--font-features);
+}
+
+/* Tight Markdown for claims-friendly readability */
+.prose-claims {
+  font-size: 14px;
+  line-height: 1.55;
+  color: theme(colors.ink);
+}
+.prose-claims > * + * { margin-top: 0.6em; }
+.prose-claims strong { font-weight: 600; color: theme(colors.ink); }
+.prose-claims em { color: theme(colors.ink); }
+.prose-claims a { color: theme(colors.brand); text-decoration: underline; text-underline-offset: 2px; }
+.prose-claims ul, .prose-claims ol { padding-left: 1.2em; }
+.prose-claims ul { list-style-type: disc; }
+.prose-claims ol { list-style-type: decimal; }
+.prose-claims li + li { margin-top: 0.2em; }
+.prose-claims h1 { font-size: 18px; font-weight: 700; }
+.prose-claims h2 { font-size: 16px; font-weight: 700; margin-top: 1em; }
+.prose-claims h3 { font-size: 14px; font-weight: 600; margin-top: 0.8em; }
+.prose-claims code {
+  font-family: theme(fontFamily.mono);
+  font-size: 12.5px;
+  background: theme(colors.sunken);
+  padding: 0 0.3em;
+  border-radius: 4px;
+}
+.prose-claims pre {
+  font-family: theme(fontFamily.mono);
+  background: theme(colors.sunken);
+  padding: 0.75em 0.9em;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 12.5px;
+}
+.prose-claims blockquote {
+  border-left: 3px solid theme(colors.line);
+  padding-left: 0.8em;
+  color: theme(colors.muted);
+}
+.prose-claims table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12.5px;
+}
+.prose-claims th, .prose-claims td {
+  border: 1px solid theme(colors.line);
+  padding: 0.35em 0.6em;
+  text-align: left;
+}
+.prose-claims th { background: theme(colors.sunken); font-weight: 600; }

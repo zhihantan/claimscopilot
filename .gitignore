@@ -1,0 +1,33 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mlruns/
+.mlruns-test/
+mlruns/
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# backend/static is the pre-built React bundle — committed so the Apps
+# container doesn't have to run npm ci/npm build (which OOMs there).
+
+# Databricks Asset Bundle state (local + workspace-specific)
+.databricks/
+
+# Claude Code local config
+.claude/
+
+# Local-only secrets and env stubs
+.devloop.env
+.env
+.env.*
+
+# Editor/system
+.DS_Store
+.idea/
+.vscode/
+*.bak

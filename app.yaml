@@ -1,0 +1,157 @@
+# Databricks Apps runtime configuration for ClaimsCopilot.
+# - Builds the React bundle into backend/static at startup.
+# - Launches uvicorn serving the FastAPI app, which also serves the React SPA.
+# - All sensitive values come from Databricks Secrets, never .env.
+
+command:
+  - bash
+  - "-lc"
+  - |
+    set -euo pipefail
+    echo "Boot: ClaimsCopilot v${CC_AGENT_VERSION:-unset}"
+    if [ -d frontend ] && [ ! -d backend/static ]; then
+      bash scripts/build_frontend.sh
+    fi
+    exec uvicorn backend.main:app \
+      --host 0.0.0.0 \
+      --port ${DATABRICKS_APP_PORT:-8000} \
+      --workers 2 \
+      --proxy-headers \
+      --forwarded-allow-ips "*" \
+      --no-server-header
+
+env:
+  - name: CC_AGENT_VERSION
+    value: "v0.3.3"
+  - name: CC_APP_ENV
+    value: "dev"
+  - name: CC_REGION
+    value: "EMEA"
+
+  # Catalogs / schemas — set for your workspace (scripts/init.py does this).
+  - name: CC_CATALOG_LAKE
+    value: "main"
+  - name: CC_CATALOG_AI
+    value: "main"
+
+  # Vector Search endpoint (scripts/bootstrap.py creates it). The three index
+  # names are DERIVED from CC_CATALOG_AI automatically — set CC_VS_IDX_* only if
+  # your indexes live somewhere other than <catalog_ai>.indexes.*.
+  - name: CC_VS_ENDPOINT
+    value: "claimscopilot_vs"
+
+  # FMAPI / AI Gateway. Out of the box the app calls FMAPI directly. To add
+  # guardrails / rate-limits / usage logging: run scripts/setup_ai_gateway.py on
+  # a serving endpoint you control, point CC_GATEWAY_CHAT at it, and flip
+  # CC_USE_GATEWAY=true (the app then calls the guarded endpoint first, with the
+  # raw FMAPI endpoints as fallback).
+  - name: CC_USE_GATEWAY
+    value: "false"
+  - name: CC_GATEWAY_CHAT
+    value: "claimscopilot-chat-gateway"
+  - name: CC_GATEWAY_EMBED
+    value: "claimscopilot-embed-gateway"
+  - name: CC_CHAT_PRIMARY
+    value: "databricks-claude-opus-4-8"
+  - name: CC_CHAT_FB1
+    value: "databricks-claude-sonnet-4-6"
+  - name: CC_CHAT_FB2
+    value: "databricks-meta-llama-3-3-70b-instruct"
+  - name: CC_EMBED_EN
+    value: "databricks-gte-large-en"
+  - name: CC_EMBED_ML
+    value: "databricks-qwen3-embedding-0-6b"
+
+  # MLflow
+  - name: CC_MLFLOW_EXPERIMENT
+    value: "/Shared/claimscopilot"
+
+  # Genie (optional) — set to a Genie space id over your claims tables to enable
+  # the NL->SQL `query_genie_space` agent tool. Unset/commented => tool disabled
+  # (it won't be offered to the planner).
+  # - name: CC_GENIE_SPACE_ID
+  #   value: "<your-genie-space-id>"
+
+  # Loop budgets
+  - name: CC_MAX_TOOLS_PER_TURN
+    value: "8"
+  - name: CC_MAX_REFLECT
+    value: "3"
+  - name: CC_TURN_HARD_TIMEOUT
+    value: "25"
+
+  # Agent graph state persistence:
+  #   "memory"   — in-process MemorySaver (default; lost on container restart).
+  #   "none"     — disable checkpointing.
+  #   "lakebase" — durable AsyncPostgresSaver on a Lakebase Postgres instance
+  #                (survives restarts; shared across workers). To enable:
+  #                  1) create a Lakebase project: scripts/create_lakebase.sh
+  #                  2) attach it to this App as a database resource (the runtime
+  #                     then auto-injects PGHOST/PGUSER/PGPORT/PGDATABASE)
+  #                  3) set ENDPOINT_NAME below and flip this value to "lakebase"
+  #                  4) bump databricks-sdk (see requirements.txt) and redeploy.
+  - name: CC_CHECKPOINTER
+    value: "memory"
+  # REQUIRED when CC_CHECKPOINTER=lakebase — the read-write endpoint resource path:
+  #   projects/<project>/branches/<branch>/endpoints/<endpoint>
+  # - name: ENDPOINT_NAME
+  #   value: "projects/claimscopilot/branches/production/endpoints/primary"
+  # PGHOST/PGUSER/PGPORT/PGDATABASE come from the attached Lakebase resource.
+  # Uncomment to override (PGUSER is the App SP client id; do not hardcode for OBO):
+  # - name: PGDATABASE
+  #   value: "claimscopilot"
+  # - name: PGSSLMODE
+  #   value: "require"
+  # - name: CC_LAKEBASE_POOL_MAX
+  #   value: "10"
+
+  # Languages
+  - name: CC_ALLOWED_LANGS
+    value: '["en","es","ja"]'
+
+  # SQL warehouse id — set for your workspace (scripts/init.py does this).
+  # For stage/prod prefer `valueFrom:` a secret over an inline value.
+  - name: CC_WAREHOUSE_ID
+    value: "REPLACE_WITH_WAREHOUSE_ID"
+  # Canary injected into the system prompt to detect prompt-leakage. Placeholder
+  # only — scripts/init.py generates a fresh random one; never commit a real
+  # canary to a public repo.
+  - name: CC_SYSTEM_CANARY
+    value: "change-me-init-generates-a-random-canary"
+
+resources:
+  - name: serving_chat_primary
+    description: "Primary chat model endpoint (FMAPI)"
+    serving_endpoint:
+      name: "databricks-claude-opus-4-8"
+      permission: "CAN_QUERY"
+  - name: serving_chat_fallback
+    description: "Fallback chat model endpoint (FMAPI)"
+    serving_endpoint:
+      name: "databricks-claude-sonnet-4-6"
+      permission: "CAN_QUERY"
+  - name: serving_embed_en
+    description: "English embedding endpoint"
+    serving_endpoint:
+      name: "databricks-gte-large-en"
+      permission: "CAN_QUERY"
+  - name: serving_embed_ml
+    description: "Multilingual embedding endpoint"
+    serving_endpoint:
+      name: "databricks-qwen3-embedding-0-6b"
+      permission: "CAN_QUERY"
+  - name: vs_endpoint
+    description: "Vector Search endpoint hosting ClaimsCopilot indexes"
+    vector_search_endpoint:
+      name: "claimscopilot_vs"
+      permission: "CAN_USE"
+  - name: warehouse
+    description: "SQL warehouse for UC Function invocation"
+    sql_warehouse:
+      id: "REPLACE_WITH_WAREHOUSE_ID"
+      permission: "CAN_USE"
+  - name: secret_scope
+    description: "Secret scope holding warehouse_id, canary, etc."
+    secret_scope:
+      name: "claimscopilot"
+      permission: "READ"

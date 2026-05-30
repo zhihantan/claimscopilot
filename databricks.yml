@@ -1,0 +1,45 @@
+# Databricks Asset Bundle for ClaimsCopilot.
+# Deploys: the App, the seed job, the eval jobs, the DLT pipeline for
+# narrative anonymization, and the registered model. Per-resource manifests
+# live under resources/. Run:
+#     databricks bundle validate
+#     databricks bundle deploy --target dev
+#     databricks bundle run seed_data
+#     databricks bundle run eval_full
+
+bundle:
+  name: claimscopilot
+
+variables:
+  catalog_lake:  { default: "main", description: "UC catalog for lakehouse data (policies, claims, devices…)" }
+  catalog_ai:    { default: "main", description: "UC catalog for AI/app objects (indexes, app tables, models)" }
+  warehouse_id:  { description: "Serverless SQL warehouse ID" }
+
+# `workspace.host` must be a literal — DAB does not support interpolation
+# on auth-configuring fields. Set it per-target below.
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
+    # No host pinned → deploys to whatever workspace your CLI profile points at,
+    # so this template runs in ANY workspace. scripts/init.py fills these vars.
+    variables:
+      catalog_lake: "main"
+      catalog_ai: "main"
+      warehouse_id: "REPLACE_WITH_WAREHOUSE_ID"
+    workspace:
+      root_path: "/Workspace/Users/${workspace.current_user.userName}/.bundle/claimscopilot/dev"
+  stage:
+    mode: production
+    workspace:
+      root_path: "/Workspace/Shared/.bundle/claimscopilot/stage"
+  prod:
+    mode: production
+    workspace:
+      root_path: "/Workspace/Shared/.bundle/claimscopilot/prod"
+    run_as:
+      service_principal_name: "claimscopilot-sp"

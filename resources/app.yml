@@ -1,0 +1,13 @@
+resources:
+  apps:
+    claimscopilot_app:
+      name: "claimscopilot"
+      description: "Assistive adjuster copilot — Phase 1 EMEA pilot"
+      source_code_path: "."
+      # Runtime config lives in ./app.yaml at the source path — the Apps
+      # platform reads it from there automatically; do not duplicate here.
+      permissions:
+        - level: CAN_USE
+          group_name: "ClaimsAdjusters_EMEA"
+        - level: CAN_MANAGE
+          group_name: "ClaimsCopilot_Eng"

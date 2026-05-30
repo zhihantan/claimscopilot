@@ -1,0 +1,341 @@
+{
+  "datasets": [
+    {
+      "name": "decisions",
+      "displayName": "Decisions",
+      "queryLines": [
+        "SELECT created_at, agent_recommendation, COALESCE(adjuster_concurred, false) AS concurred, model, agent_version FROM __CATALOG__.app.decision_log"
+      ]
+    },
+    {
+      "name": "feedback",
+      "displayName": "Feedback",
+      "queryLines": [
+        "SELECT created_at, thumbs, rating FROM __CATALOG__.app.feedback"
+      ]
+    },
+    {
+      "name": "escalations",
+      "displayName": "Escalations",
+      "queryLines": [
+        "SELECT created_at, reason, queue FROM __CATALOG__.app.escalation"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "db884c1f",
+      "displayName": "Overview",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layout": [
+        {
+          "widget": {
+            "name": "759abff6",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "decisions",
+                  "fields": [
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(*)",
+                  "displayName": "Decisions logged"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Decisions logged"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "663c2445",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "escalations",
+                  "fields": [
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(*)",
+                  "displayName": "Escalations"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Escalations"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "f417e40c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "feedback",
+                  "fields": [
+                    {
+                      "name": "avg(rating)",
+                      "expression": "AVG(`rating`)"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(rating)",
+                  "displayName": "Avg feedback rating"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Avg feedback rating"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "2fc83dce",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "decisions",
+                  "fields": [
+                    {
+                      "name": "day(created_at)",
+                      "expression": "DATE_TRUNC(\"DAY\", `created_at`)"
+                    },
+                    {
+                      "name": "count(agent_recommendation)",
+                      "expression": "COUNT(`agent_recommendation`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "day(created_at)",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "created_at"
+                },
+                "y": {
+                  "fieldName": "count(agent_recommendation)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "COUNT of agent_recommendation"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Decisions per day"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "ec3c9b19",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "decisions",
+                  "fields": [
+                    {
+                      "name": "agent_recommendation",
+                      "expression": "`agent_recommendation`"
+                    },
+                    {
+                      "name": "count(agent_recommendation)",
+                      "expression": "COUNT(`agent_recommendation`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "agent_recommendation",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  },
+                  "displayName": "agent_recommendation"
+                },
+                "y": {
+                  "fieldName": "count(agent_recommendation)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "COUNT of agent_recommendation"
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Decision mix"
+              },
+              "mark": {
+                "colors": [
+                  "#FFAB00",
+                  "#00A972",
+                  "#FF3621",
+                  "#8BCAE7",
+                  "#AB4057",
+                  "#99DDB4",
+                  "#FCA4A1",
+                  "#919191",
+                  "#BF7080"
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "0d2481e0",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "escalations",
+                  "fields": [
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    },
+                    {
+                      "name": "reason",
+                      "expression": "`reason`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "COUNT of Records"
+                },
+                "color": {
+                  "fieldName": "reason",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "reason"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Escalations by reason"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 9,
+            "width": 3,
+            "height": 6
+          }
+        }
+      ]
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}

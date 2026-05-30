@@ -1,0 +1,85 @@
+resources:
+  jobs:
+    seed_data:
+      name: "ClaimsCopilot — Seed Synthetic Data"
+      tasks:
+        - task_key: seed
+          spark_python_task:
+            python_file: ${workspace.file_path}/data/seed_synthetic.py
+            parameters:
+              - "--rows"
+              - "5000"
+              - "--warehouse-id"
+              - "${var.warehouse_id}"
+              - "--workspace-host"
+              - "${workspace.host}"
+          environment_key: seed_env
+      environments:
+        - environment_key: seed_env
+          spec:
+            client: "1"
+            dependencies:
+              - "faker==30.8.2"
+              - "databricks-sdk==0.40.0"
+
+    eval_full:
+      name: "ClaimsCopilot — Full Eval (release gate)"
+      tasks:
+        - task_key: eval
+          spark_python_task:
+            python_file: ${workspace.file_path}/eval/run_eval.py
+            parameters:
+              - "--mode"
+              - "full"
+          environment_key: eval_env
+      environments:
+        - environment_key: eval_env
+          spec:
+            client: "1"
+            dependencies:
+              - "fastapi==0.115.6"
+              - "langgraph==0.2.61"
+              - "langchain-databricks==0.1.1"
+              - "databricks-sdk==0.40.0"
+              - "databricks-vectorsearch==0.40"
+              - "mlflow==2.20.1"
+              - "pydantic==2.10.4"
+              - "pydantic-settings==2.7.1"
+              - "structlog==24.4.0"
+              - "backoff==2.2.1"
+              - "httpx==0.28.1"
+              - "orjson==3.10.13"
+              - "pandas==2.2.3"
+      schedule:
+        quartz_cron_expression: "0 0 7 ? * MON"
+        timezone_id: "UTC"
+        pause_status: PAUSED
+
+    eval_quick:
+      name: "ClaimsCopilot — Quick Eval (PR gate)"
+      tasks:
+        - task_key: eval
+          spark_python_task:
+            python_file: ${workspace.file_path}/eval/run_eval.py
+            parameters:
+              - "--mode"
+              - "quick"
+          environment_key: eval_env
+      environments:
+        - environment_key: eval_env
+          spec:
+            client: "1"
+            dependencies:
+              - "fastapi==0.115.6"
+              - "langgraph==0.2.61"
+              - "langchain-databricks==0.1.1"
+              - "databricks-sdk==0.40.0"
+              - "databricks-vectorsearch==0.40"
+              - "mlflow==2.20.1"
+              - "pydantic==2.10.4"
+              - "pydantic-settings==2.7.1"
+              - "structlog==24.4.0"
+              - "backoff==2.2.1"
+              - "httpx==0.28.1"
+              - "orjson==3.10.13"
+              - "pandas==2.2.3"

@@ -1,0 +1,15 @@
+resources:
+  pipelines:
+    narrative_anonymization:
+      name: "ClaimsCopilot — Narrative Anonymization (DLT)"
+      catalog: ${var.catalog_lake}
+      target: claims
+      continuous: false
+      development: true
+      serverless: true
+      libraries:
+        - file:
+            path: ${workspace.file_path}/dlt/anonymize_narratives.py
+      configuration:
+        pipelines.enableTrackHistory: "true"
+        catalog: ${var.catalog_lake}

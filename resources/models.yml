@@ -1,0 +1,8 @@
+# registered_models are intentionally omitted from the dev bundle.
+#
+# DAB's dev-mode prefixing (`dev_<user>_<name>`) is applied to the whole
+# `name` string, which produces an invalid identifier when the name is
+# already fully qualified (`catalog.schema.model`). The model entry will
+# be created the first time MLflow logs a version under the
+# `${var.catalog_ai}.models.claimscopilot_agent` path; there's nothing
+# to register up front for this pilot.
